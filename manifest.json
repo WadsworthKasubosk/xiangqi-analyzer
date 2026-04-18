@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Xiangqi Analyzer",
+  "version": "0.1.0",
+  "description": "play.xiangqi.com 局面分析浮层,基于 Fairy-Stockfish WASM",
+  "permissions": ["offscreen", "storage"],
+  "host_permissions": ["*://play.xiangqi.com/*"],
+  "action": {
+    "default_title": "打开 XQ 对局 Dashboard"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://play.xiangqi.com/*"],
+      "js": ["content-main.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["*://play.xiangqi.com/*"],
+      "js": ["content-iso.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "engine/stockfish.js",
+        "engine/stockfish.wasm",
+        "engine/stockfish.worker.js"
+      ],
+      "matches": ["*://play.xiangqi.com/*"]
+    }
+  ],
+  "cross_origin_embedder_policy": { "value": "require-corp" },
+  "cross_origin_opener_policy": { "value": "same-origin" },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}

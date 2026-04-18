@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>XQ 对局 Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <header class="xq-top">
+    <h1>XQ 对局</h1>
+    <div class="xq-top-actions">
+      <span id="xq-count" class="xq-count"></span>
+      <button id="xq-refresh">刷新</button>
+      <button id="xq-clear" class="danger">清空</button>
+    </div>
+  </header>
+
+  <main id="xq-view"><!-- list or detail injected here --></main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

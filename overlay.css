@@ -1,0 +1,389 @@
+/* ================================================================
+   XQ Analyzer overlay — polished dark glass UI
+   所有选择器配合 content-iso.js 里生成的 id / class,请勿修改类名
+   ================================================================ */
+
+#xq-analyzer-root {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 280px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  color: #eaecf2;
+  background:
+    linear-gradient(180deg,
+      rgba(38, 42, 54, 0.92) 0%,
+      rgba(22, 24, 32, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  z-index: 2147483647;
+  user-select: none;
+  overflow: hidden;
+  letter-spacing: 0.01em;
+  transition: box-shadow 0.2s ease;
+}
+#xq-analyzer-root:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 16px 48px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+#xq-analyzer-root.xq-collapsed { width: auto; }
+#xq-analyzer-root.xq-collapsed .xq-body { display: none; }
+
+/* ── Header ───────────────────────────────────────────────────── */
+#xq-analyzer-root .xq-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 9px 9px 9px 12px;
+  cursor: move;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.035) 0%,
+    transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#xq-analyzer-root .xq-title {
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c4c9d4;
+  margin-right: 2px;
+  white-space: nowrap;   /* 防止按钮多时标题换行把头部撑乱 */
+  flex-shrink: 0;
+}
+
+#xq-analyzer-root .xq-status {
+  flex: 1;
+  min-width: 0;
+  font-size: 10.5px;
+  color: #8a92a3;
+  text-align: right;
+  padding: 0 4px 0 6px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+#xq-analyzer-root .xq-btn {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  background: rgba(255, 255, 255, 0.055);
+  color: #d4d8e2;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 22px;
+  font-weight: 500;
+  transition: background 0.15s ease,
+              border-color 0.15s ease,
+              transform 0.08s ease;
+}
+#xq-analyzer-root .xq-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f2f4fa;
+}
+#xq-analyzer-root .xq-btn:active { transform: scale(0.93); }
+
+/* Perspective button variants (红 / 黑 / 自动) */
+#xq-analyzer-root .xq-btn.xq-persp-red {
+  background: linear-gradient(180deg,
+    rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.18));
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fecaca;
+  font-weight: 600;
+}
+#xq-analyzer-root .xq-btn.xq-persp-red:hover {
+  background: linear-gradient(180deg,
+    rgba(239, 68, 68, 0.42), rgba(220, 38, 38, 0.28));
+  color: #fff;
+}
+#xq-analyzer-root .xq-btn.xq-persp-black {
+  background: linear-gradient(180deg,
+    rgba(245, 245, 245, 0.24), rgba(200, 200, 200, 0.12));
+  border-color: rgba(240, 240, 240, 0.3);
+  color: #f5f7fc;
+  font-weight: 600;
+}
+#xq-analyzer-root .xq-btn.xq-persp-black:hover {
+  background: linear-gradient(180deg,
+    rgba(245, 245, 245, 0.38), rgba(200, 200, 200, 0.22));
+}
+
+/* ── Body ─────────────────────────────────────────────────────── */
+#xq-analyzer-root .xq-body {
+  padding: 12px 12px 10px;
+}
+
+/* ── Score row ────────────────────────────────────────────────── */
+#xq-analyzer-root .xq-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 2px;
+}
+
+#xq-analyzer-root .xq-score {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  transition: color 0.18s ease, text-shadow 0.18s ease;
+}
+#xq-analyzer-root .xq-score.xq-pos {
+  color: #4ade80;
+  text-shadow: 0 0 16px rgba(74, 222, 128, 0.32);
+}
+#xq-analyzer-root .xq-score.xq-neg {
+  color: #f87171;
+  text-shadow: 0 0 16px rgba(248, 113, 113, 0.32);
+}
+#xq-analyzer-root .xq-score.xq-eq {
+  color: #d6dae4;
+}
+
+/* 视角 + 深度合体胶囊 — 文本格式 "红·D12" / "黑·D12 ✓" */
+#xq-analyzer-root .xq-meta {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #b6bdcc;
+  font-variant-numeric: tabular-nums;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 3px 9px;
+  border-radius: 10px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+#xq-analyzer-root .xq-meta.xq-meta-red {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+#xq-analyzer-root .xq-meta.xq-meta-black {
+  color: #f5f7fc;
+  background: rgba(230, 230, 230, 0.12);
+  border-color: rgba(230, 230, 230, 0.26);
+}
+
+/* "谁走棋" 行 — 把 PV 列表锚定到具体走棋方,避免用户把对手 PV 当自己的。
+   视觉上尽量克制:只用小胶囊 + 颜色点,不要整行大面积上色抢走评分的主视觉。 */
+#xq-analyzer-root .xq-mover {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 3px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: #b6bdcc;
+}
+#xq-analyzer-root .xq-mover-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7a8090;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+#xq-analyzer-root .xq-mover.xq-mover-red {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
+}
+#xq-analyzer-root .xq-mover.xq-mover-red .xq-mover-dot {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.55);
+}
+#xq-analyzer-root .xq-mover.xq-mover-black {
+  background: rgba(230, 230, 230, 0.06);
+  border-color: rgba(230, 230, 230, 0.18);
+  color: #e5e7eb;
+}
+#xq-analyzer-root .xq-mover.xq-mover-black .xq-mover-dot {
+  background: #1f2330;
+  box-shadow:
+    0 0 0 1px rgba(245, 247, 252, 0.5),
+    0 0 8px rgba(0, 0, 0, 0.6);
+}
+/* 当前走棋方就是用户本人 → 加一条高亮描边,让"这是你的选择"更突出 */
+#xq-analyzer-root .xq-mover.xq-mover-mine {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(120, 180, 255, 0.18);
+}
+
+/* ── Lines list ───────────────────────────────────────────────── */
+#xq-analyzer-root .xq-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#xq-analyzer-root .xq-lines li {
+  display: grid;
+  grid-template-columns: 20px 54px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 9px 7px 7px;
+  background: rgba(255, 255, 255, 0.032);
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  border-radius: 7px;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.15s ease, border-color 0.15s ease,
+              transform 0.1s ease;
+}
+#xq-analyzer-root .xq-lines li:hover {
+  background: rgba(255, 255, 255, 0.065);
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: translateX(1px);
+}
+
+/* Rank badge — 颜色与点击交互的落点标记保持一致 */
+#xq-analyzer-root .xq-line-rank {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 18px;
+  background: rgba(255, 255, 255, 0.09);
+  color: #c6ccd8;
+  letter-spacing: 0;
+}
+#xq-analyzer-root .xq-lines li:nth-child(1) .xq-line-rank {
+  background: rgba(76, 175, 80, 0.28);
+  color: #86efac;
+  box-shadow: 0 0 0 1px rgba(76, 175, 80, 0.35);
+}
+#xq-analyzer-root .xq-lines li:nth-child(2) .xq-line-rank {
+  background: rgba(33, 150, 243, 0.28);
+  color: #93c5fd;
+  box-shadow: 0 0 0 1px rgba(33, 150, 243, 0.35);
+}
+#xq-analyzer-root .xq-lines li:nth-child(3) .xq-line-rank {
+  background: rgba(255, 152, 0, 0.28);
+  color: #fdba74;
+  box-shadow: 0 0 0 1px rgba(255, 152, 0, 0.35);
+}
+
+#xq-analyzer-root .xq-line-score {
+  font-weight: 600;
+  font-size: 11.5px;
+  letter-spacing: -0.01em;
+}
+#xq-analyzer-root .xq-line-score.xq-pos { color: #4ade80; }
+#xq-analyzer-root .xq-line-score.xq-neg { color: #f87171; }
+#xq-analyzer-root .xq-line-score.xq-eq  { color: #d6dae4; }
+
+#xq-analyzer-root .xq-line-pv {
+  font-family: "PingFang SC", "Microsoft YaHei",
+    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #d3d8e3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Per-ply styling: 我方着法醒目,对手预期应招减淡,中间用小圆点分隔 */
+#xq-analyzer-root .xq-line-pv .xq-ply-own {
+  color: #eaecf2;
+  font-weight: 600;
+}
+#xq-analyzer-root .xq-line-pv .xq-ply-opp {
+  color: #8c93a4;
+  font-weight: 500;
+  font-style: italic;
+  opacity: 0.85;
+}
+#xq-analyzer-root .xq-line-pv .xq-ply-sep {
+  display: inline-block;
+  margin: 0 5px;
+  color: #565c6c;
+  font-style: normal;
+}
+/* 原始 UCI:附在每步中文后面,小字暗色,用于肉眼对照棋盘校验翻译 */
+#xq-analyzer-root .xq-line-pv .xq-ply-uci {
+  margin-left: 3px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 400;
+  font-style: normal;
+  color: #6a7082;
+  letter-spacing: 0;
+  opacity: 0.85;
+}
+
+#xq-analyzer-root .xq-empty {
+  display: block;
+  padding: 14px 8px;
+  color: #767c8c;
+  font-style: italic;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+/* ── FEN debug bar ────────────────────────────────────────────── */
+#xq-analyzer-root .xq-fen {
+  margin-top: 10px;
+  padding: 6px 9px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: #6c7385;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease,
+              border-color 0.15s ease;
+}
+#xq-analyzer-root .xq-fen:hover {
+  color: #9ba2b4;
+  background: rgba(0, 0, 0, 0.38);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+#xq-analyzer-root .xq-fen.xq-fen-bad {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.42);
+}
+#xq-analyzer-root .xq-fen.xq-fen-bad:hover {
+  color: #fff1f1;
+  background: rgba(239, 68, 68, 0.28);
+  border-color: rgba(239, 68, 68, 0.55);
+}
