@@ -5,7 +5,11 @@
   <title>XQ Analyzer Engine</title>
 </head>
 <body>
-  <script src="engine/stockfish.js"></script>
+  <!-- fzstd: pure-JS zstd decoder. Pikafish ships its NNUE in zstd format
+       to halve the download; the engine itself doesn't decompress, so we
+       expand it before writing to MEMFS. -->
+  <script src="engine/fzstd.js"></script>
+  <!-- engine scripts are injected dynamically by offscreen.js per the registry -->
   <script src="offscreen.js"></script>
 </body>
 </html>

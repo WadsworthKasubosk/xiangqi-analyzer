@@ -43,7 +43,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           to: 'offscreen',
           type: 'analyze',
           fen: msg.fen,
-          moveTime: msg.moveTime || 1000
+          engineId: msg.engineId || null,
+          moveTime: msg.moveTime || null
         }))
         .catch(err => console.error('[XQ-BG] analyze relay failed:', err));
       sendResponse({ ok: true });
@@ -51,6 +52,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     if (msg.type === 'stop') {
       chrome.runtime.sendMessage({ to: 'offscreen', type: 'stop' }).catch(() => {});
+      sendResponse({ ok: true });
+      return true;
+    }
+    if (msg.type === 'listEngines') {
+      ensureOffscreen()
+        .then(() => chrome.runtime.sendMessage({ to: 'offscreen', type: 'listEngines' }))
+        .catch(err => console.error('[XQ-BG] listEngines relay failed:', err));
+      sendResponse({ ok: true });
+      return true;
+    }
+    if (msg.type === 'preload') {
+      ensureOffscreen()
+        .then(() => chrome.runtime.sendMessage({
+          to: 'offscreen',
+          type: 'preload',
+          engineId: msg.engineId || null
+        }))
+        .catch(err => console.error('[XQ-BG] preload relay failed:', err));
       sendResponse({ ok: true });
       return true;
     }
@@ -62,6 +81,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     // From offscreen → forward to content script
     if (msg.type === 'engineReady' || msg.type === 'engineError' ||
+        msg.type === 'engineLoading' || msg.type === 'engineList' ||
+        msg.type === 'nnueProgress' || msg.type === 'engineLog' ||
         msg.type === 'analysisProgress' || msg.type === 'analysisDone') {
       relayToContent(msg);
       return;

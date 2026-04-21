@@ -3,3 +3,7 @@ node_modules/
 *.log
 .vscode/
 .idea/
+
+# Claude Code per-user state — contains local paths and permission rules
+.claude/settings.local.json
+.claude/worktrees/

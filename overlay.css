@@ -7,7 +7,7 @@
   position: fixed;
   top: 16px;
   right: 16px;
-  width: 280px;
+  width: 300px;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 12px;
@@ -55,28 +55,303 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Title 收成两字 logo,把横向空间让给 status,免得 "loading pikafish…" 被截到
+   "loadi…"。完整名挂在 title 属性里,hover 看得到。 */
 #xq-analyzer-root .xq-title {
-  font-weight: 700;
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.04em;
   color: #c4c9d4;
-  margin-right: 2px;
-  white-space: nowrap;   /* 防止按钮多时标题换行把头部撑乱 */
+  background: linear-gradient(180deg,
+    rgba(120, 180, 255, 0.18), rgba(80, 130, 220, 0.08));
+  border: 1px solid rgba(120, 180, 255, 0.22);
+  border-radius: 5px;
   flex-shrink: 0;
+  cursor: help;
 }
 
+/* Status: dot + text. Dot 颜色由 kind 决定;loading/thinking 加脉冲动画。 */
 #xq-analyzer-root .xq-status {
   flex: 1;
   min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 10.5px;
   color: #8a92a3;
-  text-align: right;
-  padding: 0 4px 0 6px;
+  padding: 0 4px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
+}
+#xq-analyzer-root .xq-status .xq-status-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
+}
+#xq-analyzer-root .xq-status .xq-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #565c6c;
+  flex-shrink: 0;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+#xq-analyzer-root .xq-status.xq-status-loading .xq-status-dot,
+#xq-analyzer-root .xq-status.xq-status-thinking .xq-status-dot {
+  background: #fbbf24;
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.6);
+  animation: xq-pulse 1.1s ease-in-out infinite;
+}
+#xq-analyzer-root .xq-status.xq-status-loading,
+#xq-analyzer-root .xq-status.xq-status-thinking { color: #fbbf24; }
+#xq-analyzer-root .xq-status.xq-status-done .xq-status-dot {
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.55);
+}
+#xq-analyzer-root .xq-status.xq-status-done { color: #86efac; }
+#xq-analyzer-root .xq-status.xq-status-error .xq-status-dot {
+  background: #f87171;
+  box-shadow: 0 0 6px rgba(248, 113, 113, 0.6);
+}
+#xq-analyzer-root .xq-status.xq-status-error { color: #fca5a5; }
+#xq-analyzer-root .xq-status.xq-status-paused .xq-status-dot { background: #8a92a3; }
+#xq-analyzer-root .xq-status.xq-status-waiting .xq-status-dot {
+  background: #60a5fa;
+  box-shadow: 0 0 4px rgba(96, 165, 250, 0.45);
+}
+#xq-analyzer-root .xq-status.xq-status-waiting { color: #93c5fd; }
+@keyframes xq-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.7); }
+}
+
+/* ── Header action cluster ────────────────────────────────────── */
+#xq-analyzer-root .xq-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ── Engine selector (in body) ────────────────────────────────── */
+/* 占整行,左边是 <select>,右边一行小字描述当前引擎参数 */
+#xq-analyzer-root .xq-engine-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+#xq-analyzer-root .xq-engine-sel {
+  width: 100%;
+  height: 28px;
+  padding: 0 26px 0 9px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #eaecf2;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 26px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #aab0bf 50%),
+    linear-gradient(135deg, #aab0bf 50%, transparent 50%);
+  background-position:
+    calc(100% - 13px) 12px,
+    calc(100% - 9px) 12px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+#xq-analyzer-root .xq-engine-sel:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+#xq-analyzer-root .xq-engine-sel:focus {
+  outline: none;
+  border-color: rgba(120, 180, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(120, 180, 255, 0.18);
+}
+#xq-analyzer-root .xq-engine-sel option {
+  background: #1f2330;
+  color: #eaecf2;
+}
+#xq-analyzer-root .xq-engine-desc {
+  font-size: 10px;
+  color: #7a8090;
+  letter-spacing: 0.02em;
+  padding: 0 2px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 不定值进度条 — 切引擎/首次加载时显示。条本身宽度 0,通过 ::before 滑块
+   横向往复运动制造"在动"的感觉。引擎 ready 后由 JS 移除 .xq-engine-progress-on */
+#xq-analyzer-root .xq-engine-progress {
+  height: 0;
+  overflow: hidden;
+  margin-top: 0;
+  border-radius: 999px;
+  background: rgba(120, 180, 255, 0.08);
+  position: relative;
+  transition: height 0.2s ease, margin-top 0.2s ease;
+}
+#xq-analyzer-root .xq-engine-progress.xq-engine-progress-on {
+  height: 3px;
+  margin-top: 4px;
+}
+#xq-analyzer-root .xq-engine-progress-bar {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 0;
+  width: 35%;
+  background: linear-gradient(90deg,
+    rgba(120, 180, 255, 0) 0%,
+    rgba(120, 180, 255, 0.85) 50%,
+    rgba(120, 180, 255, 0) 100%);
+  border-radius: 999px;
+  animation: xq-engine-load 1.4s ease-in-out infinite;
+}
+/* Determinate mode — bar fills left-to-right by inline width %, no anim */
+#xq-analyzer-root .xq-engine-progress.xq-engine-progress-determinate
+  .xq-engine-progress-bar {
+  animation: none;
+  left: 0;
+  width: 0;
+  background: linear-gradient(90deg,
+    rgba(120, 180, 255, 0.5),
+    rgba(120, 180, 255, 0.95));
+  transition: width 0.18s linear;
+}
+@keyframes xq-engine-load {
+  0%   { left: -35%; }
+  100% { left: 100%; }
+}
+
+/* ── Movetime slider row ──────────────────────────────────────── */
+/* 思考时长滑块 — 让用户在"快 vs 准"之间即时取舍。每引擎独立持久化。
+   视觉上融入 engine-row 内部,当作引擎配置的第二维旋钮。 */
+#xq-analyzer-root .xq-movetime-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 2px 2px 0;
+}
+#xq-analyzer-root .xq-movetime-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8a92a3;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+#xq-analyzer-root .xq-movetime-val {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #c6ccd8;
+  font-variant-numeric: tabular-nums;
+  min-width: 34px;
+  text-align: right;
+  flex-shrink: 0;
+  letter-spacing: 0;
+}
+#xq-analyzer-root .xq-movetime-slider {
+  flex: 1;
+  height: 4px;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+#xq-analyzer-root .xq-movetime-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  background: linear-gradient(90deg,
+    rgba(120, 180, 255, 0.35) 0%,
+    rgba(120, 180, 255, 0.15) 100%);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+#xq-analyzer-root .xq-movetime-slider::-moz-range-track {
+  height: 4px;
+  background: linear-gradient(90deg,
+    rgba(120, 180, 255, 0.35) 0%,
+    rgba(120, 180, 255, 0.15) 100%);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+#xq-analyzer-root .xq-movetime-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #e4ecfa 0%, #aac4ec 100%);
+  border: 1px solid rgba(120, 180, 255, 0.55);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(0, 0, 0, 0.25);
+  margin-top: -5px;
+  cursor: grab;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+#xq-analyzer-root .xq-movetime-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #e4ecfa 0%, #aac4ec 100%);
+  border: 1px solid rgba(120, 180, 255, 0.55);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(0, 0, 0, 0.25);
+  cursor: grab;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+#xq-analyzer-root .xq-movetime-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.45),
+    0 0 0 2px rgba(120, 180, 255, 0.25);
+}
+#xq-analyzer-root .xq-movetime-slider:hover::-moz-range-thumb {
+  transform: scale(1.15);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.45),
+    0 0 0 2px rgba(120, 180, 255, 0.25);
+}
+#xq-analyzer-root .xq-movetime-slider:active::-webkit-slider-thumb { cursor: grabbing; }
+#xq-analyzer-root .xq-movetime-slider:active::-moz-range-thumb { cursor: grabbing; }
+#xq-analyzer-root .xq-movetime-slider:focus { outline: none; }
+#xq-analyzer-root .xq-movetime-slider:focus::-webkit-slider-thumb {
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.45),
+    0 0 0 2px rgba(120, 180, 255, 0.35);
+}
+#xq-analyzer-root .xq-movetime-slider:focus::-moz-range-thumb {
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.45),
+    0 0 0 2px rgba(120, 180, 255, 0.35);
 }
 
 /* ── Buttons ──────────────────────────────────────────────────── */
@@ -102,6 +377,29 @@
   color: #f2f4fa;
 }
 #xq-analyzer-root .xq-btn:active { transform: scale(0.93); }
+
+/* Icon-only buttons in the action cluster — square, no extra padding */
+#xq-analyzer-root .xq-btn.xq-btn-icon {
+  width: 24px;
+  min-width: 24px;
+  padding: 0;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Hint toggle — 开启时绿色,视觉上和 #1 推荐胶囊同色,让用户知道
+   "棋盘上那根绿箭头就是这里控制的"。 */
+#xq-analyzer-root .xq-btn#xq-hint.xq-hint-on {
+  background: linear-gradient(180deg,
+    rgba(76, 175, 80, 0.32), rgba(56, 142, 60, 0.18));
+  border-color: rgba(76, 175, 80, 0.45);
+  color: #bbf7d0;
+}
+#xq-analyzer-root .xq-btn#xq-hint.xq-hint-on:hover {
+  background: linear-gradient(180deg,
+    rgba(76, 175, 80, 0.44), rgba(56, 142, 60, 0.26));
+  color: #dcfce7;
+}
 
 /* Perspective button variants (红 / 黑 / 自动) */
 #xq-analyzer-root .xq-btn.xq-persp-red {
@@ -138,8 +436,44 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   padding: 0 2px;
+}
+
+/* ── Eval bar(横向)────────────────────────────────────────────
+   红(红方)在左,黑方一侧是浅色(和主题里 .xq-mover-black 保持一致 —
+   深色背景上"黑方"就是亮色调)。fill 宽度 = sigmoid(red_cp / 400) * 100%,
+   在 ±500cp 处饱和得差不多。mate → 贴到 0% / 100% + pulse。 */
+#xq-analyzer-root .xq-evalbar {
+  position: relative;
+  height: 7px;
+  margin: 0 2px 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: linear-gradient(180deg,
+    rgba(245, 247, 252, 0.28),
+    rgba(220, 224, 232, 0.20));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.32),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+#xq-analyzer-root .xq-evalbar-fill {
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 50%;
+  background: linear-gradient(180deg,
+    rgba(239, 68, 68, 0.88),
+    rgba(220, 38, 38, 0.72));
+  transition: width 0.35s cubic-bezier(.25, .9, .25, 1);
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.35);
+}
+#xq-analyzer-root .xq-evalbar.xq-evalbar-mate {
+  animation: xq-evalbar-pulse 0.7s ease-in-out infinite alternate;
+}
+@keyframes xq-evalbar-pulse {
+  from { filter: brightness(0.92); }
+  to   { filter: brightness(1.2); }
 }
 
 #xq-analyzer-root .xq-score {
@@ -235,6 +569,101 @@
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.08),
     0 0 0 1px rgba(120, 180, 255, 0.18);
+}
+
+/* ── Mover row: mover chip + match-stat chip on one line ────────
+   两个胶囊左右分布。stat chip 没数据时显示 "重合 —",有数据后按
+   命中率给颜色 (绿/黄/红)。点击清零。 */
+#xq-analyzer-root .xq-mover-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+#xq-analyzer-root .xq-mover-row .xq-mover {
+  margin: 0;
+  flex-shrink: 0;
+}
+#xq-analyzer-root .xq-matchstat {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #8a92a3;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+#xq-analyzer-root .xq-matchstat:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+#xq-analyzer-root .xq-matchstat.xq-matchstat-good {
+  color: #86efac;
+  background: rgba(76, 175, 80, 0.12);
+  border-color: rgba(76, 175, 80, 0.32);
+}
+#xq-analyzer-root .xq-matchstat.xq-matchstat-mid {
+  color: #fdba74;
+  background: rgba(255, 152, 0, 0.10);
+  border-color: rgba(255, 152, 0, 0.28);
+}
+#xq-analyzer-root .xq-matchstat.xq-matchstat-weak {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ── Move feedback flash ──────────────────────────────────────── */
+/* 我落子后 1.6s 闪烁提示。绝对定位到 body 中央,不占流,不抢交互。
+   中央一个大符号 (✓/△/✗/—) + 底下一行小字。 */
+#xq-analyzer-root .xq-body { position: relative; }
+#xq-analyzer-root .xq-flash {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 10;
+  border-radius: 0 0 12px 12px;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.0) 70%);
+}
+#xq-analyzer-root .xq-flash.xq-flash-show {
+  display: flex;
+  animation: xq-flash-anim 1.7s cubic-bezier(.2, .85, .25, 1) forwards;
+}
+#xq-analyzer-root .xq-flash .xq-flash-mark {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-shadow: 0 4px 20px currentColor;
+}
+#xq-analyzer-root .xq-flash .xq-flash-sub {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+}
+#xq-analyzer-root .xq-flash.xq-flash-top1 { color: #4ade80; }
+#xq-analyzer-root .xq-flash.xq-flash-near { color: #fbbf24; }
+#xq-analyzer-root .xq-flash.xq-flash-miss { color: #f87171; }
+#xq-analyzer-root .xq-flash.xq-flash-na   { color: #9aa2b4; }
+@keyframes xq-flash-anim {
+  0%   { opacity: 0; transform: scale(0.6); }
+  18%  { opacity: 1; transform: scale(1.08); }
+  35%  { opacity: 1; transform: scale(1); }
+  75%  { opacity: 0.95; }
+  100% { opacity: 0; transform: scale(1); }
 }
 
 /* ── Lines list ───────────────────────────────────────────────── */
@@ -344,6 +773,10 @@
   opacity: 0.85;
 }
 
+/* Use .xq-lines .xq-empty so specificity beats `.xq-lines li { display:grid }`,
+   otherwise the empty state inherits grid layout and the text gets shoved
+   into the first 20px column where break-all wraps per character. */
+#xq-analyzer-root .xq-lines .xq-empty,
 #xq-analyzer-root .xq-empty {
   display: block;
   padding: 14px 8px;
@@ -352,6 +785,7 @@
   text-align: center;
   font-size: 11px;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 /* ── FEN debug bar ────────────────────────────────────────────── */
