@@ -205,6 +205,11 @@
       <div class="xq-evalbar" id="xq-evalbar" title="红方 vs 黑方 客观优势条 · 红在左 · 饱和于 ±500cp">
         <div class="xq-evalbar-fill" id="xq-evalbar-fill"></div>
       </div>
+      <div class="xq-verdict" id="xq-verdict" title="结论 · 优势方 + 引擎首选着">
+        <span class="xq-verdict-side" id="xq-verdict-side">—</span>
+        <span class="xq-verdict-sep">·</span>
+        <span class="xq-verdict-best" id="xq-verdict-best">等待分析…</span>
+      </div>
       <div class="xq-mover-row">
         <div class="xq-mover" id="xq-mover" title="当前该哪一方走棋 · 下方建议即该方的着法">
           <span class="xq-mover-dot"></span>
@@ -214,7 +219,7 @@
       </div>
       <div class="xq-flash" id="xq-flash"></div>
       <ol class="xq-lines" id="xq-lines">
-        <li class="xq-empty">waiting for engine…</li>
+        <li class="xq-empty">等待引擎…</li>
       </ol>
       <div class="xq-fen" id="xq-fen" title="当前喂给引擎的 FEN · 点击复制">—</div>
     </div>
@@ -228,6 +233,9 @@
   const moverEl = $('xq-mover');
   const moverTextEl = moverEl?.querySelector('.xq-mover-text');
   const linesEl = $('xq-lines');
+  const verdictEl = $('xq-verdict');
+  const verdictSideEl = $('xq-verdict-side');
+  const verdictBestEl = $('xq-verdict-best');
   const toggleBtn = $('xq-toggle');
   const collapseBtn = $('xq-collapse');
   const perspBtn = $('xq-persp');
@@ -335,7 +343,7 @@
     logBtn.addEventListener('click', () => {
       xqLog.push('log-download', { size: xqLog.buf.length });
       xqLog.download();
-      setStatus(`log saved (${xqLog.buf.length})`, 'done');
+      setStatus(`日志已保存 (${xqLog.buf.length})`, 'done');
     });
   }
   if (feedbackBtn) {
@@ -347,15 +355,15 @@
       const text = window.prompt(hint, '');
       if (text == null) return; // 取消
       const entry = recordFeedback(text);
-      if (entry) setStatus('feedback ✓', 'done');
-      else setStatus('feedback empty', 'idle');
+      if (entry) setStatus('反馈已记录', 'done');
+      else setStatus('反馈为空', 'idle');
     });
   }
 
   fenEl.addEventListener('click', () => {
     if (!currentFen) return;
     try { navigator.clipboard.writeText(currentFen); } catch (_) {}
-    setStatus('FEN copied', 'done');
+    setStatus('FEN 已复制', 'done');
   });
 
   // ---- 落子提示 (best-move arrow on real board) --------------------------
@@ -1081,7 +1089,7 @@
     toggleBtn.textContent = enabled ? '⏸' : '▶';
     if (!enabled) {
       stopAnalyze();
-      setStatus('paused', 'paused');
+      setStatus('已暂停', 'paused');
       return;
     }
     if (currentFen && isMyTurn()) {
@@ -1089,7 +1097,7 @@
     } else if (currentFen) {
       setStatus('等对方走', 'waiting');
     } else {
-      setStatus(engineReady ? 'idle' : 'loading…', engineReady ? 'idle' : 'loading');
+      setStatus(engineReady ? '就绪' : '引擎加载中…', engineReady ? 'idle' : 'loading');
     }
   });
 
@@ -1249,7 +1257,7 @@
   }
 
   function showContextLost() {
-    setStatus('reload page', 'error');
+    setStatus('请刷新页面', 'error');
     linesEl.innerHTML =
       '<li class="xq-empty">扩展已重载,请刷新本页面 (F5)</li>';
   }
@@ -1270,13 +1278,14 @@
       pendingDispatch = null;
       lastDispatchAt = Date.now();
       if (!ctxAlive()) { showContextLost(); return; }
-      setStatus(engineReady ? 'thinking…' : 'loading…', engineReady ? 'thinking' : 'loading');
+      setStatus(engineReady ? '分析中…' : '引擎加载中…', engineReady ? 'thinking' : 'loading');
       // Reset display while we wait for first info. Show what's actually
       // happening — if engine isn't ready yet, the wait isn't analysis but
       // the WASM/NNUE cold start (Pikafish first run can take 5-10s).
       linesEl.innerHTML = engineReady
-        ? '<li class="xq-empty">analyzing…</li>'
-        : `<li class="xq-empty">loading ${escapeHtml(engineDisplayName(selectedEngineId))}…</li>`;
+        ? '<li class="xq-empty">分析中…</li>'
+        : `<li class="xq-empty">${escapeHtml(engineDisplayName(selectedEngineId))} 加载中…</li>`;
+      clearVerdict(engineReady ? '分析中…' : '引擎加载中…');
       analyzingFen = fen;
       analyzingTurn = currentTurn;
       xqLog.push('engine-dispatch', {
@@ -1349,12 +1358,12 @@
       case 'engineLoading':
         engineReady = false;
         xqLog.push('engine-loading', { engineId: msg.engineId });
-        setStatus(`loading ${engineDisplayName(msg.engineId)}…`, 'loading');
+        setStatus(`${engineDisplayName(msg.engineId)} 加载中…`, 'loading');
         showEngineProgress(true);
         // Replace the lines area too so the user knows the wait is engine,
         // not "engine done analyzing nothing". Real % shows up when
         // nnueProgress messages arrive.
-        linesEl.innerHTML = `<li class="xq-empty">loading ${escapeHtml(engineDisplayName(msg.engineId))}…</li>`;
+        linesEl.innerHTML = `<li class="xq-empty">${escapeHtml(engineDisplayName(msg.engineId))} 加载中…</li>`;
         break;
       case 'nnueProgress': {
         const { engineId, loaded, total } = msg;
@@ -1363,8 +1372,8 @@
           const pct = Math.floor((loaded / total) * 100);
           setEngineProgressPct(pct);
           const tot = (total / 1048576).toFixed(0);
-          setStatus(`NNUE ${pct}% · ${mb}/${tot}MB`, 'loading');
-          linesEl.innerHTML = `<li class="xq-empty">loading ${escapeHtml(engineDisplayName(engineId))} NNUE · ${mb}/${tot}MB</li>`;
+          setStatus(`权重下载 ${pct}% · ${mb}/${tot}MB`, 'loading');
+          linesEl.innerHTML = `<li class="xq-empty">${escapeHtml(engineDisplayName(engineId))} 权重下载中 · ${mb}/${tot}MB</li>`;
           // Throttle log to 10% buckets (and the final 100%). Offscreen sends
           // ~16 events/sec; logging each one would drown the trace buffer.
           if (lastNnueLogEngine !== engineId) {
@@ -1378,8 +1387,8 @@
           }
         } else {
           // No Content-Length header — at least surface bytes received.
-          setStatus(`NNUE ${mb}MB…`, 'loading');
-          linesEl.innerHTML = `<li class="xq-empty">loading ${escapeHtml(engineDisplayName(engineId))} NNUE · ${mb}MB</li>`;
+          setStatus(`权重下载 ${mb}MB…`, 'loading');
+          linesEl.innerHTML = `<li class="xq-empty">${escapeHtml(engineDisplayName(engineId))} 权重下载中 · ${mb}MB</li>`;
         }
         break;
       }
@@ -1396,7 +1405,7 @@
           if (engineSel) engineSel.value = msg.engineId;
           updateEngineDesc();
         }
-        setStatus(enabled ? 'idle' : 'paused', enabled ? 'idle' : 'paused');
+        setStatus(enabled ? '就绪' : '已暂停', enabled ? 'idle' : 'paused');
         // Kick off analysis only if we're not already running on the current
         // FEN. Otherwise an engineReady mid-analysis (e.g. after a switch
         // where offscreen already started analyzing) re-dispatches and forces
@@ -1414,21 +1423,21 @@
         break;
       case 'engineError':
         xqLog.push('engine-error', { message: msg.message || '' });
-        setStatus('engine error', 'error');
+        setStatus('引擎出错', 'error');
         showEngineProgress(false);
-        linesEl.innerHTML = `<li class="xq-empty">engine error: ${escapeHtml(msg.message || '')}</li>`;
+        linesEl.innerHTML = `<li class="xq-empty">引擎出错: ${escapeHtml(msg.message || '')}</li>`;
         break;
       case 'analysisProgress':
         // Engine is actively returning depth → keep status pinned to
         // thinking. No-op on subsequent calls since the kind is the same.
         if (!statusEl.classList.contains('xq-status-thinking')) {
-          setStatus('thinking…', 'thinking');
+          setStatus('分析中…', 'thinking');
         }
         renderAnalysis(msg, /*final*/ false);
         break;
       case 'analysisDone':
         renderAnalysis(msg, /*final*/ true);
-        setStatus('done', 'done');
+        setStatus('分析完成', 'done');
         // Update the stored position with final eval (top line)
         if (currentMeta) {
           const top = (msg.lines || []).slice().sort((a,b)=>a.multipv-b.multipv)[0];
@@ -1630,6 +1639,54 @@
     return true;
   }
 
+  // 结论文案:cp/mate → "红/黑方 X"。cp 是 side-to-move 视角,先翻到红方客观视角。
+  function verdictText(cp, mate, turn) {
+    const toRed = (v) => (turn === 'red' ? v : -v);
+    if (mate != null) {
+      const r = toRed(mate);
+      if (r === 0) return { side: '—', tone: 'eq' };
+      const who = r > 0 ? '红方' : '黑方';
+      return { side: `${who} ${Math.abs(mate)} 步杀`, tone: r > 0 ? 'red' : 'black' };
+    }
+    if (cp == null) return { side: '—', tone: 'eq' };
+    const r = toRed(cp);
+    const abs = Math.abs(r);
+    if (abs < 30)  return { side: '均势',    tone: 'eq' };
+    const who = r > 0 ? '红方' : '黑方';
+    const tone = r > 0 ? 'red' : 'black';
+    if (abs < 100) return { side: `${who}稍优`,     tone };
+    if (abs < 300) return { side: `${who}占优`,     tone };
+    if (abs < 600) return { side: `${who}明显优势`, tone };
+    return               { side: `${who}胜势`,     tone };
+  }
+
+  function renderVerdict(top, turn, mySide) {
+    if (!verdictEl) return;
+    const v = verdictText(top.cp, top.mate, turn);
+    if (verdictSideEl) {
+      verdictSideEl.textContent = v.side;
+      verdictSideEl.classList.remove('xq-verdict-red', 'xq-verdict-black', 'xq-verdict-eq');
+      verdictSideEl.classList.add(`xq-verdict-${v.tone}`);
+    }
+    if (verdictBestEl) {
+      const firstUci = (top.pv || [])[0];
+      if (firstUci) {
+        verdictBestEl.innerHTML = '最佳：' + (pvToPlainHtml([firstUci], currentFen, turn, mySide) || escapeHtml(firstUci));
+      } else {
+        verdictBestEl.textContent = '无推荐着';
+      }
+    }
+  }
+
+  function clearVerdict(placeholder) {
+    if (!verdictEl) return;
+    if (verdictSideEl) {
+      verdictSideEl.textContent = '—';
+      verdictSideEl.classList.remove('xq-verdict-red', 'xq-verdict-black', 'xq-verdict-eq');
+    }
+    if (verdictBestEl) verdictBestEl.textContent = placeholder || '等待分析…';
+  }
+
   // -- Render -------------------------------------------------------------
   function renderAnalysis(msg, final) {
     // Drop analyses whose target FEN is no longer the current board. This
@@ -1644,7 +1701,8 @@
         currentFen,
         final
       });
-      setStatus('stale · waiting…', 'waiting');
+      setStatus('局面已变, 重算中…', 'waiting');
+      clearVerdict('局面已变, 重算中…');
       hideHint();
       return;
     }
@@ -1664,7 +1722,8 @@
         turn: currentTurn,
         droppedFirstMoves: allLines.map(l => (l.pv || [])[0])
       });
-      setStatus('stale · waiting…', 'waiting');
+      setStatus('局面已变, 重算中…', 'waiting');
+      clearVerdict('局面已变, 重算中…');
       hideHint();
       return;
     }
@@ -1695,17 +1754,51 @@
     }
 
     const mySide = effectivePersp();
+    renderVerdict(top, currentTurn, mySide);
     linesEl.innerHTML = '';
+    // Gap 计算以 #1 为基准,后续线越低分 gap 越负。cp/mate 都在 side-to-move
+    // 视角,所以可直接相减。任何一侧是 mate 时,gap 不好用数字描述,改给短标注。
+    const topCp = top.cp;
+    const topMate = top.mate;
     for (const line of lines) {
       const li = document.createElement('li');
       const pv = (line.pv || []).slice(0, 6);
       const html = pvToPlainHtml(pv, currentFen, currentTurn, mySide)
         || escapeHtml(pv.join(' '));
       const sc = formatScore(line.cp, line.mate, currentTurn);
+      const scCls = scoreClass(line.cp, line.mate, currentTurn);
+
+      // 标签:#1 → 最佳;#2+ 且与 #1 cp 差 < 30 → 近似;其余无标签。
+      // mate 线视为非常规,只给 #1 打标签。
+      let tagHtml = '';
+      if (line.multipv === 1) {
+        tagHtml = '<span class="xq-line-tag xq-line-tag-best">最佳</span>';
+      } else if (line.cp != null && topCp != null && topMate == null && line.mate == null) {
+        const delta = Math.abs((topCp ?? 0) - (line.cp ?? 0));
+        if (delta < 30) tagHtml = '<span class="xq-line-tag xq-line-tag-near">近似</span>';
+      }
+
+      // 差距:只对 #2+ 显示。数字比较只在 cp-vs-cp 的常规情况有意义。
+      let gapHtml = '';
+      if (line.multipv !== 1) {
+        if (line.mate != null) {
+          gapHtml = `<span class="xq-line-gap">M${line.mate > 0 ? '+' : ''}${line.mate}</span>`;
+        } else if (line.cp != null && topCp != null && topMate == null) {
+          const d = line.cp - topCp;
+          gapHtml = `<span class="xq-line-gap">${d > 0 ? '+' : ''}${d}</span>`;
+        }
+      }
+
       li.innerHTML = `
         <span class="xq-line-rank">${line.multipv}</span>
-        <span class="xq-line-score ${scoreClass(line.cp, line.mate, currentTurn)}">${sc}</span>
-        <span class="xq-line-pv">${html}</span>
+        <div class="xq-line-body">
+          <div class="xq-line-pv">${html}</div>
+        </div>
+        <div class="xq-line-right">
+          ${tagHtml}
+          <span class="xq-line-score ${scCls}">${sc}</span>
+          ${gapHtml}
+        </div>
       `;
       linesEl.appendChild(li);
     }
@@ -1795,7 +1888,7 @@
   }
 
 
-  setStatus('loading…', 'loading');
+  setStatus('引擎加载中…', 'loading');
   showEngineProgress(true);
   // Pull the engine registry so the dropdown can populate. Safe to fire
   // even before background has finished setting up — background ensures
