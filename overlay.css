@@ -476,6 +476,46 @@
   to   { filter: brightness(1.2); }
 }
 
+/* 结论行:评分下方的一句话 — 谁优 · 最佳着
+   视觉上承接分数,比 Top 候选列表更显眼一点 */
+#xq-analyzer-root .xq-verdict {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+  margin: 8px 0 2px;
+  color: #c8cedd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#xq-analyzer-root .xq-verdict-side {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  flex: 0 0 auto;
+}
+#xq-analyzer-root .xq-verdict-side.xq-verdict-red   { color: #fca5a5; }
+#xq-analyzer-root .xq-verdict-side.xq-verdict-black { color: #e5e7eb; }
+#xq-analyzer-root .xq-verdict-side.xq-verdict-eq    { color: #9aa2b4; }
+#xq-analyzer-root .xq-verdict-sep {
+  color: #5c6478;
+  flex: 0 0 auto;
+}
+#xq-analyzer-root .xq-verdict-best {
+  color: #e8ecf5;
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#xq-analyzer-root .xq-verdict-best .xq-ply-uci {
+  color: #7c869c;
+  font-size: 10.5px;
+  font-weight: 500;
+  margin-left: 3px;
+}
+
 #xq-analyzer-root .xq-score {
   font-size: 28px;
   font-weight: 700;
@@ -678,7 +718,7 @@
 
 #xq-analyzer-root .xq-lines li {
   display: grid;
-  grid-template-columns: 20px 54px 1fr;
+  grid-template-columns: 20px 1fr auto;
   gap: 8px;
   align-items: center;
   padding: 7px 9px 7px 7px;
@@ -688,6 +728,46 @@
   font-variant-numeric: tabular-nums;
   transition: background 0.15s ease, border-color 0.15s ease,
               transform 0.1s ease;
+}
+#xq-analyzer-root .xq-lines li:nth-child(1) {
+  background: rgba(76, 175, 80, 0.07);
+  border-color: rgba(76, 175, 80, 0.18);
+}
+#xq-analyzer-root .xq-line-body { min-width: 0; }
+#xq-analyzer-root .xq-line-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+/* 标签:最佳/近似 — 右上角小徽章,比评分字小一号 */
+#xq-analyzer-root .xq-line-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 2px 6px;
+  border-radius: 8px;
+  line-height: 1;
+  white-space: nowrap;
+}
+#xq-analyzer-root .xq-line-tag-best {
+  background: rgba(76, 175, 80, 0.24);
+  color: #86efac;
+  box-shadow: inset 0 0 0 1px rgba(76, 175, 80, 0.38);
+}
+#xq-analyzer-root .xq-line-tag-near {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fcd34d;
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.32);
+}
+
+/* 差距:与 #1 比较的 cp 差,中性灰色 */
+#xq-analyzer-root .xq-line-gap {
+  font-size: 10px;
+  font-weight: 500;
+  color: #7c869c;
+  letter-spacing: -0.02em;
 }
 #xq-analyzer-root .xq-lines li:hover {
   background: rgba(255, 255, 255, 0.065);
