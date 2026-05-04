@@ -181,8 +181,14 @@
       <div class="xq-actions">
         <button class="xq-btn" id="xq-persp" title="切换视角 (评分归一化到哪一方) 自动 → 红 → 黑">自动</button>
         <button class="xq-btn xq-btn-icon" id="xq-hint" title="在棋盘上画出引擎推荐的落子(从起点→终点) · 偏了就运行 __xqHintTune({padX, padY}) 微调">➤</button>
-        <button class="xq-btn xq-btn-icon" id="xq-feedback" title="记录反馈(自动附带当前 FEN + 最近分析) · 控制台:__xqLog.feedback('内容')">✎</button>
-        <button class="xq-btn xq-btn-icon" id="xq-log" title="下载完整日志 (JSON) · 控制台:__xqLog.dump()">⤓</button>
+        <button class="xq-btn xq-btn-icon" id="xq-settings" title="引擎与思考时长设置">⚙</button>
+        <div class="xq-more-wrap">
+          <button class="xq-btn xq-btn-icon" id="xq-more" title="更多">⋯</button>
+          <div class="xq-more-menu" id="xq-more-menu" hidden>
+            <button class="xq-menu-item" id="xq-feedback" title="记录反馈(自动附带当前 FEN + 最近分析) · 控制台:__xqLog.feedback('内容')"><span class="xq-menu-ico">✎</span>记录反馈</button>
+            <button class="xq-menu-item" id="xq-log" title="下载完整日志 (JSON) · 控制台:__xqLog.dump()"><span class="xq-menu-ico">⤓</span>下载日志</button>
+          </div>
+        </div>
         <button class="xq-btn xq-btn-icon" id="xq-toggle" title="Pause/Resume">⏸</button>
         <button class="xq-btn xq-btn-icon" id="xq-collapse" title="Collapse">─</button>
       </div>
@@ -221,7 +227,11 @@
       <ol class="xq-lines" id="xq-lines">
         <li class="xq-empty">等待引擎…</li>
       </ol>
-      <div class="xq-fen" id="xq-fen" title="当前喂给引擎的 FEN · 点击复制">—</div>
+      <div class="xq-fen" id="xq-fen" title="当前喂给引擎的 FEN · 点击复制">
+        <span class="xq-fen-label">FEN</span>
+        <span class="xq-fen-text" id="xq-fen-text">—</span>
+        <span class="xq-fen-copy" aria-hidden="true">⎘</span>
+      </div>
     </div>
   `;
   document.documentElement.appendChild(root);
@@ -243,6 +253,7 @@
   const feedbackBtn = $('xq-feedback');
   const hintBtn = $('xq-hint');
   const fenEl = $('xq-fen');
+  const fenTextEl = $('xq-fen-text');
   const engineSel = $('xq-engine');
   const engineDescEl = $('xq-engine-desc');
   const movetimeSlider = $('xq-movetime');
@@ -1108,6 +1119,47 @@
     collapseBtn.textContent = collapsed ? '+' : '─';
   });
 
+  // -- Overflow menu (⋯) — 承接低频操作 (反馈 / 下载日志) -----------------
+  const moreBtn = $('xq-more');
+  const moreMenu = $('xq-more-menu');
+  function closeMoreMenu() { if (moreMenu) moreMenu.hidden = true; }
+  if (moreBtn && moreMenu) {
+    moreBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      moreMenu.hidden = !moreMenu.hidden;
+    });
+    // 菜单项点完后自动收起,避免视觉遮挡
+    moreMenu.addEventListener('click', () => { closeMoreMenu(); });
+    // 点击页面其他地方关闭菜单
+    document.addEventListener('mousedown', (e) => {
+      if (moreMenu.hidden) return;
+      if (!moreMenu.contains(e.target) && e.target !== moreBtn) closeMoreMenu();
+    });
+  }
+
+  // -- Settings (⚙) — 折叠高级参数行 (引擎选择 + 思考时长) ---------------
+  const SETTINGS_KEY = 'xq-settings-open-v1';
+  const settingsBtn = $('xq-settings');
+  const engineRow = root.querySelector('.xq-engine-row');
+  let settingsOpen = true;
+  try {
+    const saved = localStorage.getItem(SETTINGS_KEY);
+    if (saved === '0') settingsOpen = false;
+  } catch (_) {}
+  function applySettingsVis() {
+    if (!engineRow) return;
+    engineRow.classList.toggle('xq-engine-row-hidden', !settingsOpen);
+    if (settingsBtn) settingsBtn.classList.toggle('xq-btn-on', settingsOpen);
+  }
+  applySettingsVis();
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      settingsOpen = !settingsOpen;
+      try { localStorage.setItem(SETTINGS_KEY, settingsOpen ? '1' : '0'); } catch (_) {}
+      applySettingsVis();
+    });
+  }
+
   // -- Drag (header) ------------------------------------------------------
   (function makeDraggable() {
     const header = root.querySelector('.xq-header');
@@ -1191,7 +1243,8 @@
     // Debug bar: show moveCount + board-only part of FEN (first field)
     if (fenEl) {
       const boardPart = fen.split(' ')[0];
-      fenEl.textContent = `#${detail.moveCount ?? '?'} ${boardPart}`;
+      if (fenTextEl) fenTextEl.textContent = `#${detail.moveCount ?? '?'} ${boardPart}`;
+      else fenEl.textContent = `#${detail.moveCount ?? '?'} ${boardPart}`;
       fenEl.classList.remove('xq-fen-bad');
       fenEl.title = '当前喂给引擎的 FEN · 点击复制';
     }
@@ -1218,7 +1271,8 @@
     xqLog.push('fen-reject', { rawFen, why, consecutiveBad });
     if (!fenEl) return;
     const head = (rawFen || '').split(' ')[0].slice(0, 40);
-    fenEl.textContent = `⚠ reject×${consecutiveBad} ${why} · ${head}`;
+    if (fenTextEl) fenTextEl.textContent = `⚠ reject×${consecutiveBad} ${why} · ${head}`;
+    else fenEl.textContent = `⚠ reject×${consecutiveBad} ${why} · ${head}`;
     fenEl.classList.add('xq-fen-bad');
     fenEl.title = `被拒 FEN (连续第 ${consecutiveBad} 次)\n原因: ${why}\n原始: ${rawFen}`;
   });

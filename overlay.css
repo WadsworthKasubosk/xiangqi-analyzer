@@ -426,9 +426,67 @@
     rgba(245, 245, 245, 0.38), rgba(200, 200, 200, 0.22));
 }
 
+/* ⚙ 设置按钮开启态 — 与 hint-on 同一套绿色系,表示"面板已展开" */
+#xq-analyzer-root .xq-btn.xq-btn-on {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: rgba(76, 175, 80, 0.35);
+  color: #bbf7d0;
+}
+
+/* ⋯ 溢出菜单:锚在 ⋯ 按钮下方,点外面自动收起 */
+#xq-analyzer-root .xq-more-wrap {
+  position: relative;
+  display: inline-flex;
+}
+#xq-analyzer-root .xq-more-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 120px;
+  padding: 4px;
+  background: rgba(24, 27, 36, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 10;
+}
+#xq-analyzer-root .xq-more-menu[hidden] { display: none; }
+#xq-analyzer-root .xq-menu-item {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  color: #d3d8e3;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+#xq-analyzer-root .xq-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+#xq-analyzer-root .xq-menu-ico {
+  display: inline-flex;
+  width: 14px;
+  justify-content: center;
+  color: #9aa2b4;
+  font-size: 13px;
+}
+
 /* ── Body ─────────────────────────────────────────────────────── */
 #xq-analyzer-root .xq-body {
   padding: 12px 12px 10px;
+}
+
+/* 设置行 (引擎 + 思考时长) 折叠态:高度压扁,视觉完全隐藏 */
+#xq-analyzer-root .xq-engine-row.xq-engine-row-hidden {
+  display: none !important;
 }
 
 /* ── Score row ────────────────────────────────────────────────── */
@@ -868,10 +926,13 @@
   white-space: nowrap;
 }
 
-/* ── FEN debug bar ────────────────────────────────────────────── */
+/* ── FEN 工具条:label + 截断文本 + 复制图标 ────────────────────── */
 #xq-analyzer-root .xq-fen {
   margin-top: 10px;
   padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 10px;
   font-weight: 500;
@@ -879,18 +940,41 @@
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 6px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   cursor: pointer;
   transition: color 0.15s ease, background 0.15s ease,
               border-color 0.15s ease;
+}
+#xq-analyzer-root .xq-fen-label {
+  flex: 0 0 auto;
+  padding: 1px 5px;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #8a92a3;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+#xq-analyzer-root .xq-fen-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#xq-analyzer-root .xq-fen-copy {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: #5c6478;
+  transition: color 0.15s ease;
 }
 #xq-analyzer-root .xq-fen:hover {
   color: #9ba2b4;
   background: rgba(0, 0, 0, 0.38);
   border-color: rgba(255, 255, 255, 0.06);
 }
+#xq-analyzer-root .xq-fen:hover .xq-fen-copy { color: #b6bdcc; }
 #xq-analyzer-root .xq-fen.xq-fen-bad {
   color: #fecaca;
   background: rgba(239, 68, 68, 0.18);
